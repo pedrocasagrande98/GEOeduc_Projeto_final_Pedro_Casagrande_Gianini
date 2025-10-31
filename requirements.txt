@@ -1,5 +1,0 @@
-streamlit
-geopandas
-earthengine-api
-geemap
-requests

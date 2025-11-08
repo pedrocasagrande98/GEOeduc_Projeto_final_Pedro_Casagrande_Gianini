@@ -1,0 +1,65 @@
+
+**Resumo do Processo: Modelo de Risco Ponderado por Solo**
+
+Este documento descreve o fluxo de trabalho da ferramenta "Modelo de Risco Ponderado por Solo", baseada no arquivo `3_Modelo_Risco_Solo.py`.
+
+**Objetivo:**
+A ferramenta aplica um modelo de risco a uma mancha de inundação (ou qualquer Área de Interesse - AOI),
+ajustando sua extensão com base na tipologia do solo. A premissa é que solos argilosos (baixa infiltração) podem expandir a área de risco,
+enquanto solos arenosos (alta infiltração) podem reduzi-la.
+
+O processo é dividido em duas abas, oferecendo dois fluxos de trabalho distintos.
+
+---
+
+### **Aba 1: Fluxo Completo (Etapa 1 + 2)**
+
+Este fluxo é para usuários que possuem um mapa de solos (raster) e uma área de inundação (vetor) e desejam executar o processo completo do zero.
+
+#### **Etapa 1: Interseção Raster + Vetor**
+
+**Inputs:**
+1.  **Raster de Solos (.tif, .tiff):** Um mapa onde cada pixel tem um valor correspondente a uma classe de solo (ex: 1 para argiloso, 6 para arenoso).
+2.  **Vetor de Inundação/AOI (.geojson, .gpkg, .zip):** O polígono da área a ser analisada (ex: a mancha de inundação gerada na ferramenta anterior).
+
+**Processamento:**
+1.  O script "recorta" o raster de solos usando o polígono do vetor de inundação como máscara.
+2.  Ele então converte o raster recortado em um novo arquivo vetorial (`.geojson`).
+3.  Neste novo vetor, cada polígono corresponde a uma área com uma classe de solo uniforme, e uma coluna (por padrão, `valor_solo`) armazena o valor dessa classe.
+
+**Output (Intermediário):**
+-   **`inundacao_segmentada_por_solo.geojson`:** Um arquivo vetorial da área de inundação, agora dividida em polígonos menores,
+cada um com um atributo que identifica a classe de solo. Este arquivo fica disponível para download e é automaticamente passado para a próxima etapa.
+
+#### **Etapa 2: Buffer Proporcional com Pesos**
+
+**Inputs:**
+1.  **Arquivo Segmentado:** O resultado da Etapa 1 é usado automaticamente.
+2.  **Definições de Pesos (%):** O usuário define, para cada classe de solo, uma porcentagem de buffer a ser aplicada.
+    -   **Valores Positivos (+%):** Indicam uma expansão da área (buffer positivo). Usado para solos com baixa infiltração (argilosos).
+    -   **Valores Negativos (-%):** Indicam uma contração da área (buffer negativo). Usado para solos com alta infiltração (arenosos).
+
+**Processamento:**
+1.  O script itera sobre cada polígono do arquivo segmentado.
+2.  Para cada polígono, ele aplica a distância de buffer correspondente à sua classe de solo e ao peso definido pelo usuário.
+3.  Finalmente, todos os polígonos resultantes (expandidos e contraídos) são unidos (merge) para formar uma única mancha de inundação ponderada pelo risco do solo.
+
+**Output (Final):**
+-   **`inundacao_adsolo_buffer.geojson`:** O arquivo vetorial final, representando a mancha de inundação ajustada, que é salvo automaticamente no diretório de saídas.
+
+---
+
+### **Aba 2: Apenas Etapa 2 (Já tenho os dados)**
+
+Este fluxo é um atalho para usuários que já possuem um arquivo vetorial pronto, com as classes de solo já atribuídas a cada polígono.
+
+**Inputs:**
+1.  **Vetor Segmentado (.geojson, .gpkg, .zip):** O usuário faz o upload de um arquivo vetorial que já contém uma coluna com os valores das classes de solo.
+2.  **Nome da Coluna de Referência:** O nome da coluna no arquivo que contém os valores das classes de solo (ex: `valor_solo`).
+3.  **Definições de Pesos (%):** Idêntico à Etapa 2 do Fluxo Completo. O usuário define os pesos para cada classe.
+
+**Processamento:**
+-   O processamento é exatamente o mesmo da "Etapa 2: Buffer Proporcional com Pesos" do fluxo completo.
+
+**Output (Final):**
+-   **`inundacao_adsolo_buffer.geojson`:** O arquivo vetorial final da mancha de inundação ajustada pelo risco do solo.

@@ -1,0 +1,19 @@
+Página de Origem;Nome da Camada;Descrição;Tipo de Dado;Fonte/Processo
+Download de Dados GEE;Elevação - USGS/SRTMGL1_003;Modelo Digital de Elevação (altitude da superfície);Raster;USGS/NASA SRTM
+Download de Dados GEE;Declividade - USGS/SRTMGL1_003;Inclinação do terreno em graus;Raster;Derivado do SRTM
+Download de Dados GEE;Aspecto - USGS/SRTMGL1_003;Orientação da declividade do terreno (face norte, sul, etc.);Raster;Derivado do SRTM
+Download de Dados GEE;Uso e Cobertura do Solo (MapBiomas);Classificação de uso da terra (floresta, agricultura, urbano, etc.);Raster (Categórico);Projeto MapBiomas
+Download de Dados GEE;Solos (AD_Solos_30m) - EMBRAPA;Classificação de solos por textura e capacidade de infiltração;Raster (Categórico);EMBRAPA
+Análise Hidrológica Local;MDE Condicionado (filled_dem.tif);MDE com depressões preenchidas para análise hidrológica consistente;Raster;PySheds (Pré-processamento)
+Análise Hidrológica Local;Declividade (slope.tif);Inclinação do terreno em graus, calculada a partir do MDE condicionado;Raster;PySheds (Pré-processamento)
+Análise Hidrológica Local;Aspecto (aspect.tif);Orientação da declividade do terreno, calculada a partir do MDE condicionado;Raster;PySheds (Pré-processamento)
+Análise Hidrológica Local;Direção de Fluxo (flow_direction.tif);Direção do fluxo de água de cada célula para suas vizinhas (D8);Raster (Categórico);PySheds (Pré-processamento)
+Análise Hidrológica Local;Acumulação de Fluxo (flow_accumulation.tif);Número de células que drenam para cada célula, destacando os canais;Raster;PySheds (Pré-processamento)
+Análise Hidrológica Local;Distância do Fluxo (flow_distance.tif);Distância horizontal ou vertical de cada célula ao canal de drenagem mais próximo;Raster;PySheds (Cálculo de Distância)
+Análise Hidrológica Local;Índice Topográfico de Umidade (twi.tif);Quantifica a tendência de uma área acumular água com base na topografia;Raster;PySheds (Cálculo TWI)
+Análise Hidrológica Local;Rede de Drenagem (canais_strahler.geojson);Linhas vetoriais representando rios e córregos;Vetor (Linhas);PySheds (Extração de Drenagem)
+Análise Hidrológica Local;Bacia Hidrográfica (bacia.geojson);Polígono da área de contribuição para um ponto de saída (exutório);Vetor (Polígono);PySheds (Delineamento)
+Análise Hidrológica Local;Mapa HAND (hand_map.tif);Altura Acima da Drenagem Mais Próxima, indica propensão à inundação;Raster;PySheds (Cálculo HAND)
+Análise Hidrológica Local;Mancha de Inundação (inundacao_...);Área inundada simulada com base em uma profundidade de canal;Raster e Vetor (Polígono);PySheds (Threshold no HAND)
+Modelo de Risco Ponderado por Solo;Inundação Segmentada por Solo;Mancha de inundação dividida por tipo de solo subjacente;Vetor (Polígono);Interseção (Rasterio/GeoPandas)
+Modelo de Risco Ponderado por Solo;Inundação com Buffer Ponderado;Mancha de inundação final ajustada pelos pesos de infiltração do solo;Vetor (Polígono);Buffer Proporcional (GeoPandas)

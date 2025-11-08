@@ -1,0 +1,57 @@
+
+**Resumo do Processo: Análise Hidrológica Local (PySheds)**
+
+Este documento descreve o fluxo de trabalho da ferramenta "Análise Hidrológica Local", baseada no arquivo `2_Análise_Hidrológica_Local.py`.
+
+**Objetivo:**
+A ferramenta foi projetada para realizar uma análise hidrológica completa a partir de um Modelo Digital de Elevação (MDE),
+culminando na delineação de uma bacia hidrográfica e na simulação de uma mancha de inundação utilizando o modelo HAND (Height Above Nearest Drainage).
+
+---
+
+### **Etapa 1: Pré-processamento do MDE**
+
+Esta é a fase inicial e fundamental, onde o MDE bruto é preparado para a análise hidrológica.
+
+**Inputs:**
+1.  **Arquivo MDE (.tif, .tiff):** O Modelo Digital de Elevação da área de interesse. É a camada base para toda a análise.
+2.  **Limiar de Drenagem (número de células):** Um valor inteiro que define a área de contribuição mínima para que um canal de drenagem seja formado.
+Valores maiores resultam em uma rede de drenagem menos densa.
+
+**Processamento:**
+O script executa as seguintes ações, utilizando a biblioteca PySheds:
+1.  **Condicionamento do MDE:** Preenche depressões (sinks) para garantir um fluxo de água contínuo na superfície.
+2.  **Cálculo da Direção de Fluxo:** Determina a direção que a água fluirá para fora de cada célula do MDE.
+3.  **Cálculo do Acúmulo de Fluxo:** Calcula, para cada célula, o número total de células que drenam para ela.
+4.  **Extração da Rede de Drenagem:** Utiliza o "Limiar de Drenagem" para identificar as células com acúmulo de fluxo suficiente para serem consideradas parte de um rio ou córrego.
+5.  **Cálculo de Declividade e TWI:** Gera camadas adicionais de informação topográfica.
+
+**Outputs (intermediários):**
+-   MDE condicionado.
+-   Raster de direção de fluxo.
+-   Raster de acúmulo de fluxo.
+-   Rede de drenagem (raster).
+-   Os resultados são armazenados internamente para serem usados na próxima etapa.
+
+---
+
+### **Etapa 2: Delinear Bacia e Simular Inundação (HAND)**
+
+Nesta fase, o usuário define um ponto de interesse (exutório) para delinear a bacia de contribuição e simular uma inundação.
+
+**Inputs:**
+1.  **Coordenadas do Exutório (Longitude, Latitude):** O ponto de saída da bacia hidrográfica que se deseja delinear (ex: a localização de uma ponte, cidade, etc.).
+2.  **Profundidade do Canal (metros):** A altura da lâmina d'água no canal do rio, usada para simular a extensão da inundação.
+Este valor pode ser associado a um tempo de retorno (TR) específico (ex: 10 metros para uma cheia de 100 anos).
+
+**Processamento:**
+1.  **Delineação da Bacia:** A partir do exutório e dos dados pré-processados, o script identifica toda a área de contribuição (a bacia hidrográfica).
+2.  **Cálculo do HAND:** Gera um mapa normalizado que mostra a altura de cada ponto da bacia em relação ao canal de drenagem mais próximo.
+3.  **Simulação da Mancha de Inundação:** Com base no mapa HAND e na "Profundidade do Canal", o script identifica todas as áreas que estariam abaixo do nível da água, gerando a mancha de inundação.
+
+**Outputs (Finais - para Download):**
+-   **`bacia.geojson`:** Arquivo vetorial com o polígono da bacia hidrográfica delineada.
+-   **`canais_strahler.geojson`:** Arquivo vetorial da rede de drenagem, classificada pela ordem de Strahler.
+-   **`inundacao_{sufixo}.geojson`:** Arquivo vetorial com o polígono da área inundada.
+-   **`inundacao_mapa_{sufixo}.tif`:** Arquivo raster (mapa) da área inundada.
+-   **`flu_distance.tif`:** Raster que mede a distância do fluxo de cada célula até o exutório.

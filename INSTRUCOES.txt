@@ -1,0 +1,95 @@
+# Tutorial Detalhado da Plataforma de Análise Geoespacial Integrada
+
+## 1. Bem-vindo! Qual o objetivo desta plataforma?
+
+O objetivo deste projeto é fornecer uma **Plataforma de Análise Geoespacial Integrada** em formato de aplicação web. Ele foi desenvolvido para automatizar e simplificar a execução de análises hidrológicas, de risco e de impacto, que normalmente exigiriam o uso de múltiplos softwares e um conhecimento técnico aprofundado.
+
+**O problema que resolvemos:** Centralizamos em uma única interface diversas tarefas de geoprocessamento, como o download de dados de diferentes fontes (Google Earth Engine, OpenStreetMap, Open Buildings), o processamento de modelos digitais de elevação (MDE), a delimitação de bacias hidrográficas, o cálculo do índice HAND e a análise quantitativa de feições impactadas por eventos (como inundações).
+
+**Principais Entradas (Inputs):**
+*   **Arquivos vetoriais (GeoJSON, GPKG, Shapefile):** Utilizados para definir a Área de Interesse (AOI).
+*   **Modelos Digitais de Elevação (GeoTIFF):** Utilizados como base para análises hidrológicas.
+*   **Parâmetros definidos pelo usuário:** Valores como limiares, buffers e opções de análise inseridos na interface.
+
+**Principais Saídas (Outputs):**
+*   **Arquivos Raster (GeoTIFF):** Mapas de elevação, declividade, aspecto, HAND, etc.
+*   **Arquivos Vetoriais (GeoJSON, GPKG):** Bacias hidrográficas, redes de drenagem, polígonos de construções, arruamentos e resultados de análises de risco.
+*   **Relatórios e Estatísticas:** Dados quantitativos sobre o impacto em feições, como contagem de edifícios em uma área de risco.
+*   **Visualizações no mapa:** Apresentação interativa dos resultados na própria aplicação.
+
+## 2. Como utilizar a plataforma?
+
+### Passo 1: Pré-requisitos
+
+Antes de começar, garanta que você tenha o **Python 3.8 ou superior** instalado em seu sistema.
+
+Em seguida, instale todas as bibliotecas necessárias. Para facilitar, todas estão listadas no arquivo `requirements.txt`. Abra seu terminal ou prompt de comando e execute:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Passo 2: Estrutura do Projeto
+
+Para que você entenda onde encontrar cada funcionalidade, aqui está a organização do projeto:
+
+*   `pages/`: Contém os arquivos Python de cada página da aplicação Streamlit (ex: `1_Delimitar_Bacia.py`, `2_Processar_HAND.py`).
+*   `scripts/`: Armazena os módulos Python com a lógica de backend (ex: `processamento_hidrologico.py`, `analise_risco.py`).
+*   `insumos/`: Pasta com explicações detalhadas sobre as camadas e processos.
+*   `Fluxograma/`: Contém o fluxograma do sistema em formato Mermaid.js e a imagem PNG.
+*   `INSTRUCOES.txt`: Este tutorial que você está lendo.
+*   `readme.md`: A documentação principal do projeto para o GitHub.
+*   `requirements.txt`: A lista de bibliotecas Python para instalação.
+
+### Passo 3: Execução da Aplicação
+
+Para iniciar a plataforma, abra seu terminal, navegue até a pasta raiz do projeto (`7_ENTREGA`) e execute o seguinte comando:
+
+```bash
+streamlit run HOME.py
+```
+
+Uma nova aba será aberta automaticamente em seu navegador no endereço `http://localhost:8501`.
+
+### Passo 4: Navegando pelas Páginas
+
+A aplicação é dividida em várias páginas, cada uma com uma função específica. Utilize o menu na barra lateral esquerda para navegar entre elas.
+
+#### Página Inicial (`HOME.py`)
+
+*   **O que faz?** Apresenta uma introdução ao projeto, seus objetivos e um resumo das funcionalidades. É o ponto de partida da sua jornada.
+
+#### 1. Delimitar Bacia Hidrográfica
+
+*   **O que faz?** Permite delimitar uma bacia hidrográfica a partir de um ponto de exutório (saída) que você define.
+*   **Como usar:**
+    1.  **Faça o upload de um arquivo vetorial (GeoJSON, Shapefile, etc.)** que represente sua Área de Interesse (AOI).
+    2.  **Clique no mapa** para definir o ponto de exutório (o ponto por onde a água escoa da bacia).
+    3.  **Aguarde o processamento.** O sistema irá baixar os dados de elevação, preencher depressões (sinks) e calcular a área de contribuição para delimitar a bacia.
+    4.  **Visualize e baixe o resultado:** A bacia delimitada será exibida no mapa, e você poderá baixar o arquivo vetorial correspondente.
+
+#### 2. Processar Índice HAND
+
+*   **O que faz?** Calcula o índice HAND (*Height Above the Nearest Drainage*), que normaliza o terreno em relação à rede de drenagem e é fundamental para análises de inundação.
+*   **Como usar:**
+    1.  **Faça o upload da bacia hidrográfica** que você delimitou no passo anterior (ou qualquer outra área de interesse).
+    2.  **Aguarde o processamento.** O sistema irá gerar a rede de drenagem e calcular o mapa HAND para a área.
+    3.  **Visualize e baixe o resultado:** O mapa HAND será exibido, e você poderá baixar o arquivo raster (GeoTIFF).
+
+#### 3. Análise de Risco
+
+*   **O que faz?** Identifica feições (como construções e ruas) que estão dentro de uma área de risco definida por um limiar de inundação (cota).
+*   **Como usar:**
+    1.  **Faça o upload do mapa HAND** gerado no passo anterior.
+    2.  **Defina uma cota de inundação (em metros).** Este valor representa a altura da lâmina d'água.
+    3.  **Escolha as feições que deseja analisar:** Marque as opções "Construções" e/ou "Arruamento".
+    4.  **Aguarde a análise.** O sistema irá baixar os dados do OpenStreetMap e Open Buildings, cruzar com a mancha de inundação e quantificar o impacto.
+    5.  **Visualize os resultados:** Veja no mapa as áreas e feições impactadas e confira as estatísticas (ex: "150 edificações afetadas"). Você também pode baixar os dados vetoriais das feições impactadas.
+
+## 3. Dicas e Solução de Problemas
+
+*   **Autenticação no Google Earth Engine:** Na primeira vez que você usar uma função que depende do GEE, o sistema pode pedir para você se autenticar. Siga as instruções no terminal: copie o link, faça login com sua conta Google, autorize o acesso e cole o código de verificação de volta no terminal.
+*   **Demora no processamento:** Análises geoespaciais, especialmente para áreas grandes, podem consumir tempo e recursos computacionais. Seja paciente enquanto os processos são executados.
+*   **Erros de arquivo:** Certifique-se de que os arquivos que você está enviando (GeoJSON, GeoTIFF) estão no formato correto e não estão corrompidos.
+
+Esperamos que este tutorial detalhado ajude você a aproveitar ao máximo nossa plataforma! Em caso de dúvidas, consulte a documentação no `readme.md` ou explore os scripts na pasta `scripts/` para entender a lógica por trás de cada processo.
